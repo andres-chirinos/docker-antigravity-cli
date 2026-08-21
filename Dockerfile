@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV WORKSPACE="/workspace"
 ENV HOME="$WORKSPACE/.gemini-cfg"
 WORKDIR $WORKSPACE
+ENV PATH="/root/.local/bin:${PATH}"
 RUN curl -fsSL https://antigravity.google/cli/install.sh | bash
 
 CMD [ "agy" ]
