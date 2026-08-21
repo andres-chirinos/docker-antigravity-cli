@@ -1,0 +1,44 @@
+name: Check for new Antigravity CLI version
+
+on:
+  schedule:
+    # Daily
+    - cron: '0 0 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  check-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Get latest published version from project repository
+        id: github
+        run: |
+          VERSION=$(git ls-remote --tags --sort=v:refname https://github.com/google-antigravity/antigravity-cli | tail -n1 | awk -F/ '{print $3}')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check if this version was already released
+        id: check
+        run: |
+          if git rev-parse "v${{ steps.github.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create release for new version
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${{ steps.github.outputs.version }}" \
+            --title "v${{ steps.github.outputs.version }}" \
+            --notes "Antigravity CLI v${{ steps.github.outputs.version }}
+            Automated release tracking google-antigravity/antigravity-cli@${{ steps.github.outputs.version }} on GitHub."
