@@ -1,10 +1,14 @@
-## Build the iamge and push to Docker repository
+# Docker Antigravity CLI
+
+A Docker image that packages the [Antigravity CLI](https://github.com/google-antigravity/antigravity-cli), with automated CI/CD to track upstream releases and publish container images to GHCR.
+
+## Build the image and push to Docker repository
 (You don't have to do this if you feel safe to use my image on Docker Hub)
 
 
 ## Prerequisites
 - Docker installed and running
-- Geoogle account or API key for authentication
+- Google account or API key for authentication
 
 
 ## How It Works
@@ -26,7 +30,7 @@ The Docker run command includes specific flags to handle file permissions:
 - `-u $(id -u):$(id -g)` - Runs container with your host user/group IDs
 
 This prevents permission issues when Antigravity CLI creates files in mounted volumes.
-**You are very likely that you don't need them if you have not configured user namespace on your Docker service.**
+**You very likely don't need these flags if you have not configured user namespace on your Docker service.**
 
 ```sh
 # Run Antigravity CLI in Docker
@@ -38,3 +42,10 @@ docker run -it --rm \
     -w /workspace \
     ghcr.io/antonyho/docker-antigravity-cli
 ```
+
+### Available Image Tags
+The following tags are published for each release:
+- `latest` — Always points to the most recent release
+- `X.Y.Z` (e.g. `1.1.19`) — Specific version
+- `X.Y` (e.g. `1.1`) — Latest patch for that minor version
+- `X` (e.g. `1`) — Latest release for that major version
