@@ -27,6 +27,7 @@ jobs:
         id: check-release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
           if [ "${{ github.event_name }}" = "release" ]; then
             RAW_TAG="${{ github.event.release.tag_name }}"
@@ -43,7 +44,7 @@ jobs:
             ARTIFACTS=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/artifacts" --jq '.artifacts[].name' 2>/dev/null || true)
             if echo "$ARTIFACTS" | grep -q "^release-metadata$"; then
               echo "New release metadata artifact found."
-              gh run download "${{ github.event.workflow_run.id }}" -n release-metadata -D ./release-state
+              gh run download "${{ github.event.workflow_run.id }}" --repo "${{ github.repository }}" -n release-metadata -D ./release-state
               if [ -f "./release-state/release.env" ]; then
                 TAG=$(grep "^tag=" ./release-state/release.env | cut -d'=' -f2)
                 VERSION=$(grep "^version=" ./release-state/release.env | cut -d'=' -f2)
