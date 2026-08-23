@@ -12,10 +12,6 @@ permissions:
 jobs:
   check-and-release:
     runs-on: ubuntu-latest
-    outputs:
-      release_created: ${{ steps.check.outputs.exists == 'false' }}
-      version: ${{ steps.github.outputs.version }}
-      tag: v${{ steps.github.outputs.version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -26,6 +22,14 @@ jobs:
         id: github
         run: |
           VERSION=$(git ls-remote --tags --sort=v:refname https://github.com/google-antigravity/antigravity-cli | tail -n1 | awk -F/ '{print $3}')
+          if [ -z "$VERSION" ]; then
+            echo "::error::Failed to fetch version from upstream repository."
+            exit 1
+          fi
+          if ! echo "$VERSION" | grep -qE '^v?[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Fetched version '$VERSION' does not match expected semver format (X.Y.Z or vX.Y.Z)."
+            exit 1
+          fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Check if this version was already released
