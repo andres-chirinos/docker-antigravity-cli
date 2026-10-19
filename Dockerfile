@@ -20,4 +20,9 @@ ENV HOME="$WORKSPACE/.gemini-cfg"
 WORKDIR $WORKSPACE
 RUN mkdir -p $HOME
 
-CMD [ "agy" ]
+# Copiar y configurar el script de entrada
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT [ "/entrypoint.sh" ]
+CMD [ "agy", "remote-control", "start" ]
